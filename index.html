@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations Ecosystem · Sebastian Valenza</title>
+<meta name="description" content="Five single-file operational control surfaces that follow one decision down the whole chain — from the shift being covered to the cash being collected. Built by Sebastian Valenza.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Spline+Sans+Mono:wght@400;500;600&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10;--panel:#12161d;--panel2:#171c25;--line:#252c38;
+    --txt:#e6e9ef;--muted:#8a93a3;--dim:#5f6877;
+    --acid:#c4f042;--acid-dim:#8aa82e;--amber:#ffb347;--blue:#6ea8ff;--red:#ff6b5e;--violet:#b89dff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--txt);font-family:'Archivo',sans-serif;line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 12% -10%,rgba(196,240,66,.06),transparent 40%),radial-gradient(circle at 92% 4%,rgba(110,168,255,.05),transparent 36%);}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 28px 60px}
+  .mono{font-family:'Spline Sans Mono',monospace}
+  a{color:var(--blue);text-decoration:none}
+
+  /* hero */
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--acid-dim);margin-bottom:18px}
+  h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(34px,6.5vw,62px);line-height:1.0;letter-spacing:-.02em;max-width:16ch}
+  .lede{color:var(--muted);font-size:clamp(15px,2.2vw,18px);margin-top:22px;max-width:60ch}
+  .lede b{color:var(--txt);font-weight:600}
+  .herometa{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
+  .tag{font-family:'Spline Sans Mono',monospace;font-size:11px;padding:6px 12px;border:1px solid var(--line);border-radius:100px;color:var(--muted)}
+  .tag.hot{border-color:var(--acid-dim);color:var(--acid)}
+
+  /* value chain */
+  .chain-sec{margin-top:60px}
+  .chain-lbl{font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+  .chain-line{font-family:'Fraunces',serif;font-size:clamp(19px,3vw,25px);font-weight:600;color:var(--txt);margin-bottom:26px}
+  .chain-line .em{color:var(--acid);font-style:italic}
+  .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  @media(max-width:960px){.flow{grid-template-columns:repeat(3,1fr)}}@media(max-width:660px){.flow{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.flow{grid-template-columns:1fr}}
+  .node{position:relative;border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:16px 15px 15px;display:flex;flex-direction:column;min-height:128px;transition:.16s}
+  .node:hover{border-color:var(--acid-dim);transform:translateY(-2px)}
+  .node .stage{font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acid-dim)}
+  .node .nm{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin:6px 0 7px;line-height:1.1}
+  .node .q{font-size:12px;color:var(--muted);flex:1}
+  .node .go{font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--dim);margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+  .node .go .live{color:var(--acid)}
+  .node .idx{position:absolute;top:14px;right:14px;font-family:'Spline Sans Mono',monospace;font-size:10px;color:var(--dim)}
+
+  /* tool detail cards */
+  .tools{margin-top:64px}
+  .sec-h{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--acid-dim);margin-bottom:22px}
+  .tool{border-top:1px solid var(--line);padding:26px 0;display:grid;grid-template-columns:120px 1fr auto;gap:24px;align-items:start}
+  @media(max-width:720px){.tool{grid-template-columns:1fr;gap:10px}}
+  .tool .stage-col{font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--acid-dim);padding-top:5px}
+  .tool h3{font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:7px}
+  .tool p{font-size:13.5px;color:#c7cdd8;max-width:62ch}
+  .tool .links{display:flex;gap:8px;flex-wrap:wrap}
+  @media(max-width:720px){.tool .links{margin-top:6px}}
+  .lk{font-family:'Spline Sans Mono',monospace;font-size:11.5px;padding:8px 13px;border:1px solid var(--line);border-radius:9px;color:var(--muted);white-space:nowrap;transition:.15s}
+  .lk:hover{border-color:var(--acid-dim);color:var(--acid)}
+  .lk.primary{border-color:var(--acid-dim);color:var(--acid)}
+  .bridge-note{font-family:'Spline Sans Mono',monospace;font-size:11px;color:var(--acid-dim);margin-top:9px;padding:7px 11px;border-left:2px solid var(--acid-dim);background:rgba(196,240,66,.05);border-radius:0 7px 7px 0;max-width:62ch}
+
+  /* profile / pitch */
+  .pitch{margin-top:68px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(196,240,66,.04),transparent);padding:34px 32px}
+  .pitch .sec-h{margin-bottom:18px}
+  .pitch h2{font-family:'Fraunces',serif;font-size:clamp(21px,3vw,27px);font-weight:600;margin-bottom:14px;max-width:30ch}
+  .pitch p{font-size:14px;color:#c7cdd8;max-width:66ch;margin-bottom:13px}
+  .pitch p b{color:var(--txt);font-weight:600}
+  .facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .fact{border:1px solid var(--line);border-radius:10px;padding:11px 15px;background:var(--panel)}
+  .fact .v{font-family:'Spline Sans Mono',monospace;font-size:17px;font-weight:600;color:var(--acid)}
+  .fact .k{font-size:11px;color:var(--muted);margin-top:2px}
+  .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .cta a{font-family:'Spline Sans Mono',monospace;font-size:12.5px;padding:11px 18px;border-radius:10px;border:1px solid var(--line);color:var(--txt);transition:.15s}
+  .cta a:hover{border-color:var(--acid-dim)}
+  .cta a.solid{background:var(--acid);color:#0a0c10;border-color:var(--acid);font-weight:600}
+
+  /* how it's built */
+  .built{margin-top:60px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.built{grid-template-columns:1fr}}
+  .bcard{border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:20px 22px}
+  .bcard h4{font-size:14px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+  .bcard h4 .d{width:7px;height:7px;border-radius:50%;background:var(--acid)}
+  .bcard p{font-size:13px;color:#bac1cd}
+  .bcard code{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--blue);background:rgba(110,168,255,.08);padding:1px 5px;border-radius:4px}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:var(--dim)}
+  footer a{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header>
+    <div class="kicker">Operations Ecosystem</div>
+    <h1>One decision, followed from the shift to the cash.</h1>
+    <p class="lede">Six operational control surfaces for a single multi-hub business — each one a screen an operator actually acts on. Built to follow one question down the whole chain: <b>is the shift covered, who takes what, is the team performing, does the base retain and grow, will we make the number, did the money land?</b> Same hubs, same markets, same data universe — one company seen from six functions.</p>
+    <div class="herometa">
+      <span class="tag mono hot">6 tools · live demos</span>
+      <span class="tag mono">Single-file · no backend</span>
+      <span class="tag mono">Synthetic data only</span>
+      <span class="tag mono">Madrid 🇪🇸 · Berlin 🇩🇪 · Warsaw 🇵🇱 · Dublin 🇮🇪</span>
+    </div>
+  </header>
+
+  <!-- VALUE CHAIN -->
+  <section class="chain-sec">
+    <div class="chain-lbl">The value chain</div>
+    <div class="chain-line">From the <span class="em">shift covered</span> to the <span class="em">cash collected</span> — each tool answers the next link.</div>
+    <div class="flow">
+      <a class="node" href="./shift-planner/">
+        <span class="idx">01</span>
+        <span class="stage">Capacity</span>
+        <span class="nm">Shift Planner</span>
+        <span class="q">Is the shift covered?</span>
+        <span class="go"><span class="live">● live</span><span>open →</span></span>
+      </a>
+      <a class="node" href="./ticket-triage/">
+        <span class="idx">02</span>
+        <span class="stage">Workflow</span>
+        <span class="nm">Ticket Triage</span>
+        <span class="q">Who takes what, without collisions?</span>
+        <span class="go"><span class="live">● live</span><span>open →</span></span>
+      </a>
+      <a class="node" href="./performance-tracker/">
+        <span class="idx">03</span>
+        <span class="stage">Productivity</span>
+        <span class="nm">Performance Tracker</span>
+        <span class="q">Is the team performing?</span>
+        <span class="go"><span class="live">● live</span><span>open →</span></span>
+      </a>
+      <a class="node" href="./customer-cockpit/">
+        <span class="idx">04</span>
+        <span class="stage">Retention</span>
+        <span class="nm">Customer Cockpit</span>
+        <span class="q">Does the base retain &amp; grow?</span>
+        <span class="go"><span class="live">● live</span><span>open →</span></span>
+      </a>
+      <a class="node" href="./revenue-cockpit/">
+        <span class="idx">05</span>
+        <span class="stage">Revenue</span>
+        <span class="nm">Revenue Cockpit</span>
+        <span class="q">Will we make the number?</span>
+        <span class="go"><span class="live">● live</span><span>open →</span></span>
+      </a>
+      <a class="node" href="./ar-cockpit/">
+        <span class="idx">06</span>
+        <span class="stage">Cash</span>
+        <span class="nm">AR Cockpit</span>
+        <span class="q">Did the money actually land?</span>
+        <span class="go"><span class="live">● live</span><span>open →</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- TOOL DETAIL -->
+  <section class="tools">
+    <div class="sec-h">The six surfaces</div>
+
+    <div class="tool">
+      <div class="stage-col">01 · Capacity</div>
+      <div>
+        <h3>Shift Planner</h3>
+        <p>Turns a flat roster into a visual coverage plan — who works when, where staffing falls short of target, and which assignments breach working-time rules. Three rules checked live as you edit: at most five days in any rolling seven, twelve hours between shifts, one shift a day. Catches gaps and breaches while you build the rota, not after it ships.</p>
+      </div>
+      <div class="links">
+        <a class="lk primary" href="./shift-planner/">Live demo</a>
+        <a class="lk" href="https://github.com/sebastianvalenza/shift-planner">Code</a>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="stage-col">02 · Workflow</div>
+      <div>
+        <h3>Ticket Triage</h3>
+        <p>Sorts a ticketing export into an owned, de-duplicated queue the moment it loads — separating the customers who opened several tickets from the genuinely unique ones, so two agents never work the same customer in parallel. Claim, assign, merge and resolve, with consolidation kept non-destructive and fully reversible.</p>
+      </div>
+      <div class="links">
+        <a class="lk primary" href="./ticket-triage/">Live demo</a>
+        <a class="lk" href="https://github.com/sebastianvalenza/ticket-triage">Code</a>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="stage-col">03 · Productivity</div>
+      <div>
+        <h3>Performance Tracker</h3>
+        <p>A live, filterable read on how a multi-market support team is performing — who is on pace, which operation is lagging, how the month is trending. A "floor" tier model shows the weakest link instead of hiding it behind an average: an operation only turns gold when every agent clears the bar. Month-to-date projection flags a shortfall in week two, not on the last day.</p>
+      </div>
+      <div class="links">
+        <a class="lk primary" href="./performance-tracker/">Live demo</a>
+        <a class="lk" href="https://github.com/sebastianvalenza/performance-tracker">Code</a>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="stage-col">04 · Retention</div>
+      <div>
+        <h3>Customer Cockpit</h3>
+        <p>The bridge from support quality to retained revenue. Net &amp; gross revenue retention as the headline, an ARR bridge from expansion to churn, account health scoring, and retention by cohort. Account health is seeded by each hub's support quality — so the region with the weakest support floor carries the worst retention, made visible in one health-versus-revenue chart.</p>
+        <div class="bridge-note">↑ Fed by Performance Tracker: import QA-by-operation and the account health scores re-compute from real support data. ↓ Feeds Revenue Cockpit: export the retained + expanded base as the installed revenue new sales build on.</div>
+      </div>
+      <div class="links">
+        <a class="lk primary" href="./customer-cockpit/">Live demo</a>
+        <a class="lk" href="https://github.com/sebastianvalenza/customer-cockpit">Code</a>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="stage-col">05 · Revenue</div>
+      <div>
+        <h3>Revenue Cockpit</h3>
+        <p>A single screen for a director running multiple regions: quota attainment, manager comparison on one yardstick, pipeline coverage against the gap to quota, and an end-of-quarter forecast with a commit / best / worst band. Moves the read from <i>what closed</i> to <i>what will happen</i>.</p>
+        <div class="bridge-note">↑ Builds on Customer Cockpit's retained base. → Bridges into AR Cockpit: export closed-won deals as an invoice file, upload it into AR, and watch the same money become a receivable to collect.</div>
+      </div>
+      <div class="links">
+        <a class="lk primary" href="./revenue-cockpit/">Live demo</a>
+        <a class="lk" href="https://github.com/sebastianvalenza/revenue-cockpit">Code</a>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="stage-col">06 · Cash</div>
+      <div>
+        <h3>AR Cockpit</h3>
+        <p>The last link: turns a raw AR book into the four things a collections lead acts on every morning — where money is aging, whether collection is slipping, who to chase first, and how much cash realistically lands next quarter. A prioritization engine scores every account and re-routes disputes to "resolve" rather than chasing payment that can't yet be collected.</p>
+        <div class="bridge-note">← Receives Revenue Cockpit's closed-won deals as receivables — the deal a region books becomes the cash this cockpit collects.</div>
+      </div>
+      <div class="links">
+        <a class="lk primary" href="./ar-cockpit/">Live demo</a>
+        <a class="lk" href="https://github.com/sebastianvalenza/ar-cockpit">Code</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PITCH -->
+  <section class="pitch">
+    <div class="sec-h">Who built this</div>
+    <h2>An operations leader who builds the tools the operation runs on.</h2>
+    <p>I lead a 50+ agent operation across 14 regulated European markets, reporting straight to department leadership with no layer in between. The KPIs I own are revenue-linked; the team I run is multilingual and multi-market. When the operation needed visibility and the off-the-shelf tools didn't fit, I built the tooling myself — reporting automation, scheduling, a live performance dashboard, an AI case assistant — and put them into production with the team.</p>
+    <p>This ecosystem is that instinct rebuilt from scratch on synthetic data: five control surfaces that show how I think about an operation end to end — <b>capacity, workflow, productivity, revenue, cash</b> — not as five reports, but as one chain where each decision feeds the next. Six years before this in finance and operations at SAP and Dell: collections, accounts receivable, order-to-cash, 100% of collection and revenue targets across North America for two consecutive years.</p>
+    <div class="facts">
+      <div class="fact"><div class="v">50+</div><div class="k">agents led</div></div>
+      <div class="fact"><div class="v">14</div><div class="k">regulated markets</div></div>
+      <div class="fact"><div class="v">6</div><div class="k">tools in this ecosystem</div></div>
+      <div class="fact"><div class="v">6 yrs</div><div class="k">finance &amp; ops · SAP, Dell</div></div>
+    </div>
+    <div class="cta">
+      <a class="solid" href="https://github.com/sebastianvalenza" target="_blank" rel="noopener">GitHub →</a>
+      <a href="https://linkedin.com/in/sebastianvalenza" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </section>
+
+  <!-- HOW IT'S BUILT -->
+  <section class="built">
+    <div class="bcard">
+      <h4><span class="d"></span>One file each, runs anywhere</h4>
+      <p>Every tool is a single <code>index.html</code> — no backend, no build step, no framework. Vanilla JavaScript, Chart.js for visuals, PapaParse for CSV. Deployable to GitHub Pages as-is; opens instantly with zero setup.</p>
+    </div>
+    <div class="bcard">
+      <h4><span class="d"></span>Your data, or the demo</h4>
+      <p>Each ships with a seeded synthetic dataset so the demo works on first load. Drop in a real export and the column-mapping uploader handles it — European or US number and date formats, mixed separators and encodings, with skipped rows reported, never silently dropped.</p>
+    </div>
+    <div class="bcard">
+      <h4><span class="d"></span>One shared universe</h4>
+      <p>All five run on the same four hubs, the same ten markets and the same <code>mulberry32</code> seed. The roster Shift Planner staffs is the population Performance Tracker scores; the deal Revenue Cockpit books is the receivable AR Cockpit collects.</p>
+    </div>
+    <div class="bcard">
+      <h4><span class="d"></span>Nothing leaves the browser</h4>
+      <p>All processing is client-side. No credentials, no uploads to a server, no data leaving the page. Every figure on screen is synthetic — no real customers, agents, deals or company names appear anywhere.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Sebastian Valenza · Operations &amp; Revenue · Warsaw</span>
+    <span><a href="https://github.com/sebastianvalenza">github.com/sebastianvalenza</a> · <a href="https://linkedin.com/in/sebastianvalenza">linkedin</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
